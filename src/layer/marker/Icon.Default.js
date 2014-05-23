@@ -30,16 +30,31 @@ L.Icon.Default = L.Icon.extend({
 
 L.Icon.Default.imagePath = (function () {
 	var scripts = document.getElementsByTagName('script'),
-	    leafletRe = /[\/^]leaflet[\-\._]?([\w\-\._]*)\.js\??/;
+        filenameRe = /[\/^](leaflet|mapbox|webmap)[\-\._]?([\w\-\._]*)\.js\??/;
+    var idRe = /(leaflet|mapbox|webmap)[\w\-\._]*(-script)?/;
 
-	var i, len, src, path;
+	var i, len, src, path, id;
 
+	// Filename-based matching
 	for (i = 0, len = scripts.length; i < len; i++) {
 		src = scripts[i].src;
 
-		if (src.match(leafletRe)) {
-			path = src.split(leafletRe)[0];
+		if (src.match(filenameRe)) {
+			path = src.split(filenameRe)[0];
 			return (path ? path + '/' : '') + 'images';
 		}
 	}
+
+	// ID-based matching
+	for (i = 0, len = scripts.length; i < len; i++) {
+		src = scripts[i].src;
+		id = scripts[i].getAttribute('id');
+
+		if (id && id.match(idRe)) {
+			// Strip the filename and any query params after the last "/".
+			path = src.split(/\/([\w\-\._]+\.js)(\?(.+))?$/)[0];
+			return (path ? path + '/' : '') + 'images';
+		}
+	}
+	return undefined;
 }());
