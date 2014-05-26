@@ -30,8 +30,10 @@ L.Icon.Default = L.Icon.extend({
 
 L.Icon.Default.imagePath = (function () {
 	var scripts = document.getElementsByTagName('script'),
-        filenameRe = /[\/^](leaflet|mapbox|webmap)[\-\._]?([\w\-\._]*)\.js\??/;
-    var idRe = /(leaflet|mapbox|webmap)[\w\-\._]*(-script)?/;
+	    leafletRe = /(?:\/|^)leaflet[\-\._]?([\w\-\._]*)\.js\??/,
+	    idRe = /leaflet[\w\-\._]*(-script)?/,
+	    // "str.split(splitRe)[0]" will return full path to the resource.
+	    splitRe = /\/([\w\-\._]+\.js)(\?(.+))?$/;
 
 	var i, len, src, path, id;
 
@@ -39,8 +41,8 @@ L.Icon.Default.imagePath = (function () {
 	for (i = 0, len = scripts.length; i < len; i++) {
 		src = scripts[i].src;
 
-		if (src.match(filenameRe)) {
-			path = src.split(filenameRe)[0];
+		if (src.match(leafletRe)) {
+			path = src.split(splitRe)[0];
 			return (path ? path + '/' : '') + 'images';
 		}
 	}
@@ -51,10 +53,8 @@ L.Icon.Default.imagePath = (function () {
 		id = scripts[i].getAttribute('id');
 
 		if (id && id.match(idRe)) {
-			// Strip the filename and any query params after the last "/".
-			path = src.split(/\/([\w\-\._]+\.js)(\?(.+))?$/)[0];
+			path = src.split(splitRe)[0];
 			return (path ? path + '/' : '') + 'images';
 		}
 	}
-	return undefined;
 }());
